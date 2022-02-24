@@ -4,20 +4,19 @@ import PySimpleGUI as pg
 import re
 from sklearn.linear_model import LinearRegression
 
-PERCENTIL25 = 0.7130
-PERCENTIL5 = 0.4641
-PERCENTIL2 = 0.3730
-PERCENTIL1 = 0.3124
-PERCENTIL05 = 0.2693
-PERCENTIL01 = 0.1886
-SENSITIVITY = [2, 2, 38, 2, 9]
-
-SENSITIVITY = [2, 38, 2, 2, 9]
+STUDIE = "DesignPointLog.csv"
+PERCENTIL25 = 1.7865
+PERCENTIL5 = 0.9812
+PERCENTIL2 = 0.7683
+PERCENTIL1 = 0.6465
+PERCENTIL05 = 0.5468
+PERCENTIL01 = 0.3839
+SENSITIVITY = [1, 6, 1, 1, 4]
 # [minimum, maximum]
+LAENGE = [90, 200]
+DICKE = [1, 20]
 RADIUS = [1, 15]
 BREITE = [30, 100]
-DICKE = [1, 20]
-LAENGE = [90, 200]
 KRAFT = [50, 1000]
 
 FONT_SIZE = ("Arial", 18)
@@ -51,10 +50,10 @@ LAYOUT = [[
             [pg.Text("Die Distanz beträgt:")],
             [pg.Text("Der Index des ähnlichsten Falls ist:")],
             [pg.Text("Die Lösung liegt innerhalb des Perzentils:")],
-            [pg.Text("Verformung über Hilfsebene:")],
-            [pg.Text("Spannung über Hilfsbene:")],
-            [pg.Text("Distanz zu Fällen im Radius:", size=(25 ,2))],
-            [pg.Text("Indices der Fälle:")],
+            [pg.Text("Vorhergesagte Verformung:")],
+            [pg.Text("Vorhergesagte Spannung:")],
+            [pg.Text("Distanz zu Fällen im Radius:", size=(25,2))],
+            [pg.Text("Indices der Fälle:", size=(25,2))],
         ]),
         pg.Column([
             [pg.Text("", key='-Ergebnis-Aehnlich-', size=(25,1))],
@@ -66,7 +65,7 @@ LAYOUT = [[
             [pg.Text("", key='-Ergebnis-Verformung-', size=(25,1))],
             [pg.Text("", key='-Ergebnis-Spannung-', size=(25,1))],
             [pg.Text("", key='-Ergebnis-Radiusfaelle-', size=(25,2))],
-            [pg.Text("", key='-Ergebnis-Radiusdistanzen-', size=(25,1))],
+            [pg.Text("", key='-Ergebnis-Radiusdistanzen-', size=(25,2))],
         ]),
         ],
         [
@@ -101,7 +100,7 @@ def main():
             np.set_printoptions(suppress=True)
 
             # CSV wird einglesen und in ablagearray abgelegt
-            with open("studie2002.csv", encoding='utf-8-sig') as file_name:
+            with open(STUDIE, encoding='utf-8-sig') as file_name:
                 ablagearray = np.loadtxt(file_name, delimiter=",")
             
             # Hiermit werden zwei Spalten im Array ausgetauscht
