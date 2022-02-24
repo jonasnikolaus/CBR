@@ -118,6 +118,8 @@ def main():
             # Hiermit wird der nähste Nachbar zwischen case=benutzereingabe und array=csv gefunden (metric=)
             nbrs = NearestNeighbors(n_neighbors=10, algorithm='auto').fit(arraynorm)
             distances, indices = nbrs.kneighbors(normedinput)
+            
+            
 
             # Hiermit können Nachbarn in einem bestimmten Radius gefunden werden 
             neigh = NearestNeighbors(radius=float(values['-Radiussuche-']))
@@ -169,7 +171,8 @@ def main():
                 percentsolution = "0.5%"
             if distanz < PERCENTIL01:
                 percentsolution = "0.1%"
-
+                
+            #indices muss mit zahlen aus array ersetzt werden
             # Lineare Regression Verformung
             X = arrayzerlegt1[indices]
             y = arrayloesung6[indices]
@@ -203,7 +206,7 @@ def main():
             #print(regspann.score(d221, e221))
             regspannpred = regspann.predict(input)
             #print(regspannpred)
-            
+            print(indices[0][0])
             # Ergebnisse anzeigen
             # re.sub() wird genutzt um manche Ergebnisse ohne Klammern anzuzeigen
             fenster['-Ergebnis-Aehnlich-'].update(re.sub('[\[\]]', '', np.array2string(arrayzerlegt1[indices])))
