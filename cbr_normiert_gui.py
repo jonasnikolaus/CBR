@@ -29,6 +29,7 @@ LAYOUT = [[
             [pg.Text("Radius in mm:  (1-15)    ")],
             [pg.Text("Kraft in N:    (50-1000) ")],
             [pg.Text("Nachbarn innerhalb des Radius: ")],
+            [pg.Text("Maximale Anzahl der Nachbarn: ")],
         ]),
         pg.Column([
             [pg.Input(150, size=(4, 1), key="-Laenge-")],
@@ -36,7 +37,8 @@ LAYOUT = [[
             [pg.Input(50, size=(4, 1), key="-Breite-")],
             [pg.Input(10, size=(4, 1), key="-Radius-")],
             [pg.Input(500, size=(4, 1), key="-Kraft-")],
-            [pg.Input(1.5, size=(4, 1), key="-Radiussuche-")],
+            [pg.Input(0.6, size=(4, 1), key="-Radiussuche-")],
+            [pg.Input(40, size=(4, 1), key="-Anzahlnachbarn-")],
         ]),
         ],
         [
@@ -52,6 +54,7 @@ LAYOUT = [[
             [pg.Text("Die Lösung liegt innerhalb des Perzentils:")],
             [pg.Text("Vorhergesagte Verformung:")],
             [pg.Text("Vorhergesagte Spannung:")],
+            [pg.Text("Anzahl einbezogener Fälle:")],
             [pg.Text("Distanz zu Fällen im Radius:", size=(25,2))],
             [pg.Text("Indices der Fälle:", size=(25,2))],
         ]),
@@ -64,6 +67,7 @@ LAYOUT = [[
             [pg.Text("", key='-Ergebnis-Perzentil-', size=(25,1))],
             [pg.Text("", key='-Ergebnis-Verformung-', size=(25,1))],
             [pg.Text("", key='-Ergebnis-Spannung-', size=(25,1))],
+            [pg.Text("", key='-Ergebnis-Faelleanzahl-', size=(25,1))],
             [pg.Text("", key='-Ergebnis-Radiusfaelle-', size=(25,2))],
             [pg.Text("", key='-Ergebnis-Radiusdistanzen-', size=(25,2))],
         ]),
@@ -116,10 +120,24 @@ def main():
             arraynorm = (arrayzerlegt1 - minimum) / range * SENSITIVITY
 
             # Hiermit wird der nähste Nachbar zwischen case=benutzereingabe und array=csv gefunden (metric=)
-            nbrs = NearestNeighbors(n_neighbors=10, algorithm='auto').fit(arraynorm)
+            nbrs = NearestNeighbors(n_neighbors=int(values['-Anzahlnachbarn-']), algorithm='auto').fit(arraynorm)
             distances, indices = nbrs.kneighbors(normedinput)
             
-            
+            SUCHDISTANZ = float(values['-Radiussuche-'])
+
+            suchindices = np.zeros(len(distances[0]))
+            i = 0
+            while i < len(distances[0]): #länge z.b. 10
+                if distances[0][i] <= SUCHDISTANZ:
+                    suchindices[i] = indices[0][i]
+
+                i = i + 1
+
+            print(len(distances[0]))
+            print(suchindices) 
+            suchindicesohnenull=suchindices[(suchindices>0)]
+            print(suchindicesohnenull)
+            print(len(suchindicesohnenull))
 
             # Hiermit können Nachbarn in einem bestimmten Radius gefunden werden 
             neigh = NearestNeighbors(radius=float(values['-Radiussuche-']))
@@ -171,19 +189,15 @@ def main():
                 percentsolution = "0.5%"
             if distanz < PERCENTIL01:
                 percentsolution = "0.1%"
-                
+
+            suchindicesohnenull = suchindicesohnenull.astype(int)
+            #"""  
             #indices muss mit zahlen aus array ersetzt werden
             # Lineare Regression Verformung
-            X = arrayzerlegt1[indices]
-            y = arrayloesung6[indices]
-
-            nsamples, nx, ny = X.shape
-            d2_train_dataset = X.reshape((nsamples, nx*ny))
-            d22 = d2_train_dataset.reshape((10, 5))
-
-            nsol, mx, my = y.shape
-            e2_train_dataset = y.reshape((nsol, mx*my))
-            e22 = e2_train_dataset.reshape((10, 1))
+            X = arrayzerlegt1[suchindicesohnenull]
+            y = arrayloesung6[suchindicesohnenull]
+            d22 = X.reshape((len(suchindicesohnenull), 5))
+            e22 = y.reshape((len(suchindicesohnenull), 1))
 
             regverf = LinearRegression().fit(d22, e22)
             #print(regverf.score(d22, e22))
@@ -191,22 +205,16 @@ def main():
             #print(regverfpred)
 
             # Lineare Regression Spannung
-            X1 = arrayzerlegt1[indices]
-            y1 = arrayloesung5[indices]
-
-            n1samples, nx1, ny1 = X1.shape
-            d21_train_dataset = X1.reshape((n1samples, nx1*ny1))
-            d221 = d21_train_dataset.reshape((10, 5))
-
-            n1sol, mx1, my1 = y1.shape
-            e21_train_dataset = y1.reshape((n1sol, mx1*my1))
-            e221 = e21_train_dataset.reshape((10, 1))
+            X1 = arrayzerlegt1[suchindicesohnenull]
+            y1 = arrayloesung5[suchindicesohnenull]
+            d221 = X1.reshape((len(suchindicesohnenull), 5))
+            e221 = y1.reshape((len(suchindicesohnenull), 1))
 
             regspann = LinearRegression().fit(d221, e221)
             #print(regspann.score(d221, e221))
             regspannpred = regspann.predict(input)
             #print(regspannpred)
-            print(indices[0][0])
+            
             # Ergebnisse anzeigen
             # re.sub() wird genutzt um manche Ergebnisse ohne Klammern anzuzeigen
             fenster['-Ergebnis-Aehnlich-'].update(re.sub('[\[\]]', '', np.array2string(arrayzerlegt1[indices])))
@@ -217,6 +225,7 @@ def main():
             fenster['-Ergebnis-Perzentil-'].update(percentsolution)
             fenster['-Ergebnis-Verformung-'].update(re.sub('[\[\]]', '', np.array2string(regverfpred)))
             fenster['-Ergebnis-Spannung-'].update(re.sub('[\[\]]', '', np.array2string(regspannpred)))
+            fenster['-Ergebnis-Faelleanzahl-'].update(len(suchindicesohnenull))
             fenster['-Ergebnis-Radiusfaelle-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[0][0]))))
             fenster['-Ergebnis-Radiusdistanzen-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[1][0]))))
 
