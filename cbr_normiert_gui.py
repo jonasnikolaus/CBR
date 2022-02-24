@@ -12,6 +12,7 @@ PERCENTIL1 = 0.6465
 PERCENTIL05 = 0.5468
 PERCENTIL01 = 0.3839
 SENSITIVITY = [1, 6, 1, 1, 4]
+
 # [minimum, maximum]
 LAENGE = [90, 200]
 DICKE = [1, 20]
@@ -122,36 +123,23 @@ def main():
             # Hiermit wird der nähste Nachbar zwischen case=benutzereingabe und array=csv gefunden (metric=)
             nbrs = NearestNeighbors(n_neighbors=int(values['-Anzahlnachbarn-']), algorithm='auto').fit(arraynorm)
             distances, indices = nbrs.kneighbors(normedinput)
-            
             SUCHDISTANZ = float(values['-Radiussuche-'])
 
+            # Hiermit wird ein Array angelegt welches die Indices im Radius für die lin. Regression enthalten
             suchindices = np.zeros(len(distances[0]))
             i = 0
             while i < len(distances[0]): #länge z.b. 10
                 if distances[0][i] <= SUCHDISTANZ:
                     suchindices[i] = indices[0][i]
-
                 i = i + 1
 
-            print(len(distances[0]))
-            print(suchindices) 
+            # Hiermit werden Felder welche den Wert 0 enthalten aus dem Array entfernt
             suchindicesohnenull=suchindices[(suchindices>0)]
-            print(suchindicesohnenull)
-            print(len(suchindicesohnenull))
 
             # Hiermit können Nachbarn in einem bestimmten Radius gefunden werden 
             neigh = NearestNeighbors(radius=float(values['-Radiussuche-']))
             neigh.fit(arraynorm)
             rng = neigh.radius_neighbors(normedinput)
-
-            # Distanz zu allen Punkten die Näher sind als der eingegebene Radius
-            print("------LÖSUNG-------")
-            #print("Distanz zu allen Punkten, die näher sind als der eingegebene Radius")
-            #print(np.asarray(rng[0][0]))
-
-            # Indices der Punkte
-            #print("Indices der Punkte")
-            #print(np.asarray(rng[1][0]))
 
             # Das Array wird weiter zerlegt um Spannung und Verformung auszudrücken(print)
             arrayloesung = np.delete(arrayzerlegt0, 0, 1)
@@ -161,16 +149,6 @@ def main():
             arrayloesung4 = np.delete(arrayloesung3, 0, 1)
             arrayloesung5 = np.delete(arrayloesung4, 0, 1)
             arrayloesung6 = np.delete(arrayloesung4, 1, 1)
-
-            # Test
-            #print("Vergleichsspannung in MPa:" + str(arrayloesung5[indices]))
-            #print("Verschiebung in mm:" + str(arrayloesung6[indices]))
-            #Test, nicht nötig
-            #print ('-----Indices') 
-            #print (indices)
-            #print ('-----Distanzen') 
-            #print (distances)
-            #print("Das ähnlichste Ergebnis ist der Fall mit folgenden Maßen: " + str(arrayzerlegt1[indices]))
 
             # Nur die Distanz zum nähsten Fall
             distanz = distances[0][0]
@@ -190,30 +168,25 @@ def main():
             if distanz < PERCENTIL01:
                 percentsolution = "0.1%"
 
+            # Float Array wird in Int Array umgewandelt
             suchindicesohnenull = suchindicesohnenull.astype(int)
-            #"""  
-            #indices muss mit zahlen aus array ersetzt werden
+
             # Lineare Regression Verformung
             X = arrayzerlegt1[suchindicesohnenull]
             y = arrayloesung6[suchindicesohnenull]
             d22 = X.reshape((len(suchindicesohnenull), 5))
             e22 = y.reshape((len(suchindicesohnenull), 1))
-
             regverf = LinearRegression().fit(d22, e22)
-            #print(regverf.score(d22, e22))
             regverfpred = regverf.predict(input)
-            #print(regverfpred)
+
 
             # Lineare Regression Spannung
             X1 = arrayzerlegt1[suchindicesohnenull]
             y1 = arrayloesung5[suchindicesohnenull]
             d221 = X1.reshape((len(suchindicesohnenull), 5))
             e221 = y1.reshape((len(suchindicesohnenull), 1))
-
             regspann = LinearRegression().fit(d221, e221)
-            #print(regspann.score(d221, e221))
             regspannpred = regspann.predict(input)
-            #print(regspannpred)
             
             # Ergebnisse anzeigen
             # re.sub() wird genutzt um manche Ergebnisse ohne Klammern anzuzeigen
