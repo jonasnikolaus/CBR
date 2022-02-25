@@ -190,7 +190,7 @@ def main():
             
             # Ergebnisse anzeigen
             # re.sub() wird genutzt um manche Ergebnisse ohne Klammern anzuzeigen
-            fenster['-Ergebnis-Aehnlich-'].update(re.sub('[\[\]]', '', np.array2string(arrayzerlegt1[indices])))
+            fenster['-Ergebnis-Aehnlich-'].update(re.sub('[\[\]]', '', np.array2string(arrayzerlegt1[indices].astype(int))))
             fenster['-Ergebnis-Vergleichsspannung-'].update(re.sub('[\[\]]', '', np.array2string(arrayloesung5[indices])))
             fenster['-Ergebnis-Verschiebung-'].update(re.sub('[\[\]]', '', np.array2string(arrayloesung6[indices])))
             fenster['-Ergebnis-Distanz-'].update(re.sub('[\[\]]', '', np.array2string(distances[0][0])))
@@ -201,7 +201,10 @@ def main():
             fenster['-Ergebnis-Faelleanzahl-'].update(len(suchindicesohnenull))
             fenster['-Ergebnis-Radiusfaelle-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[0][0]))))
             fenster['-Ergebnis-Radiusdistanzen-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[1][0]))))
-
+            print(regspannpred[0][0])
+            vglarraray = np.zeros(51)
+            vglarraray[2] = 1
+            print(vglarraray)
         fenster.refresh()
 
 # Wird gebraucht um main zu starten 
