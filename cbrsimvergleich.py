@@ -151,7 +151,7 @@ def main():
 
                 # Hiermit werden Felder welche den Wert 0 enthalten aus dem Array entfernt
                 suchindicesohnenull=suchindices[(suchindices>0)]
-
+               
                 # Hiermit können Nachbarn in einem bestimmten Radius gefunden werden 
                 neigh = NearestNeighbors(radius=float(values['-Radiussuche-']))
                 neigh.fit(arraynorm)
@@ -188,7 +188,7 @@ def main():
                 suchindicesohnenull = suchindicesohnenull.astype(int)
                 
                 # wird benötigt wegen vergleich
-                input = normedinput
+                input = eingabezerlegt1[[durchgang]]
 
                 if len(suchindicesohnenull) > 0:
 
@@ -231,7 +231,17 @@ def main():
                 vglarray[durchgang] = regverfpred[0][0]
                 vglarraysp[durchgang] = regspannpred[0][0]
                 durchgang = durchgang + 1
-                
+                if durchgang == 50:
+                    print(vglarray)
+                    #print(vglarraysp)
+                    #print(suchindicesohnenull)
+                    #print(indices)
+                    #print(regspannpred)
+                    print(regverfpred)
+                    #print(X)
+                    #print(y)
+                    #print(input)
+                #"""
                 if durchgang == 50:
                     print(vglarray)
                     print(vglarraysp)
@@ -248,6 +258,7 @@ def main():
 
                     filepath1 = 'vgl5sp.xlsx'
                     ef.to_excel(filepath1, index=False)
+                #"""
 
         fenster.refresh()
 

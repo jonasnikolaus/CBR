@@ -4,6 +4,7 @@ import PySimpleGUI as pg
 import re
 from sklearn.linear_model import LinearRegression
 
+#STUDIE = "studie2002.csv"
 STUDIE = "DesignPointLog.csv"
 PERCENTIL25 = 1.7865
 PERCENTIL5 = 0.9812
@@ -52,7 +53,7 @@ LAYOUT = [[
             [pg.Text("Verschiebung in mm:")],
             [pg.Text("Die Distanz beträgt:")],
             [pg.Text("Der Index des ähnlichsten Falls ist:")],
-            [pg.Text("Die Lösung liegt innerhalb des Perzentils:")],
+            [pg.Text("Die Entfernung zu diesem Fall liegt innerhalb des Perzentils:")],
             [pg.Text("Vorhergesagte Verformung:")],
             [pg.Text("Vorhergesagte Spannung:")],
             [pg.Text("Anzahl einbezogener Fälle:")],
@@ -171,23 +172,26 @@ def main():
             # Float Array wird in Int Array umgewandelt
             suchindicesohnenull = suchindicesohnenull.astype(int)
 
-            # Lineare Regression Verformung
-            X = arrayzerlegt1[suchindicesohnenull]
-            y = arrayloesung6[suchindicesohnenull]
-            d22 = X.reshape((len(suchindicesohnenull), 5))
-            e22 = y.reshape((len(suchindicesohnenull), 1))
-            regverf = LinearRegression().fit(d22, e22)
-            regverfpred = regverf.predict(input)
+            if len(suchindicesohnenull) > 0:
+                # Lineare Regression Verformung
+                X = arrayzerlegt1[suchindicesohnenull]
+                y = arrayloesung6[suchindicesohnenull]
+                d22 = X.reshape((len(suchindicesohnenull), 5))
+                e22 = y.reshape((len(suchindicesohnenull), 1))
+                regverf = LinearRegression().fit(d22, e22)
+                regverfpred = regverf.predict(input)
 
+                # Lineare Regression Spannung
+                X1 = arrayzerlegt1[suchindicesohnenull]
+                y1 = arrayloesung5[suchindicesohnenull]
+                d221 = X1.reshape((len(suchindicesohnenull), 5))
+                e221 = y1.reshape((len(suchindicesohnenull), 1))
+                regspann = LinearRegression().fit(d221, e221)
+                regspannpred = regspann.predict(input)
+            else:
+                regverfpred = np.empty(0)
+                regspannpred = np.empty(0)
 
-            # Lineare Regression Spannung
-            X1 = arrayzerlegt1[suchindicesohnenull]
-            y1 = arrayloesung5[suchindicesohnenull]
-            d221 = X1.reshape((len(suchindicesohnenull), 5))
-            e221 = y1.reshape((len(suchindicesohnenull), 1))
-            regspann = LinearRegression().fit(d221, e221)
-            regspannpred = regspann.predict(input)
-            
             # Ergebnisse anzeigen
             # re.sub() wird genutzt um manche Ergebnisse ohne Klammern anzuzeigen
             fenster['-Ergebnis-Aehnlich-'].update(re.sub('[\[\]]', '', np.array2string(arrayzerlegt1[indices].astype(int))))
@@ -201,10 +205,10 @@ def main():
             fenster['-Ergebnis-Faelleanzahl-'].update(len(suchindicesohnenull))
             fenster['-Ergebnis-Radiusfaelle-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[0][0]))))
             fenster['-Ergebnis-Radiusdistanzen-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[1][0]))))
-            print(regspannpred[0][0])
-            vglarraray = np.zeros(51)
-            vglarraray[2] = 1
-            print(vglarraray)
+            #print(suchindicesohnenull)
+            #print(regspannpred)
+            #print(X)
+            #print(y)
         fenster.refresh()
 
 # Wird gebraucht um main zu starten 
