@@ -4,7 +4,6 @@ import PySimpleGUI as pg
 import re
 from sklearn.linear_model import LinearRegression
 
-#STUDIE = "studie2002.csv"
 STUDIE = "DesignPointLog.csv"
 PERCENTIL25 = 1.7865
 PERCENTIL5 = 0.9812
@@ -205,10 +204,7 @@ def main():
             fenster['-Ergebnis-Faelleanzahl-'].update(len(suchindicesohnenull))
             fenster['-Ergebnis-Radiusfaelle-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[0][0]))))
             fenster['-Ergebnis-Radiusdistanzen-'].update(re.sub('[\[\]]', '', np.array2string(np.asarray(rng[1][0]))))
-            #print(suchindicesohnenull)
-            #print(regspannpred)
-            #print(X)
-            #print(y)
+
         fenster.refresh()
 
 # Wird gebraucht um main zu starten 
